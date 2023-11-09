@@ -1,13 +1,13 @@
 # Projekt-Design-Lab
 Repozytorium poświęcone projektowi z Design Laboratory.
 Projekt tworzony przez zespół nr 5 - Bartosz Zaporowski, Łukasz Żądło
-To przedsięwzięcie zakłada zaprojektowanie oraz wykonanie stroika gitarowego bazując na mikrokontrolerze STM32L476 wraz z modułem mikrofonowym oraz wyświetlaczem OLED.
+To przedsięwzięcie zakłada zaprojektowanie oraz wykonanie stroika gitarowego bazując na mikrokontrolerze STM32F769I-DISCO wraz z modułem mikrofonowym oraz wyświetlaczem OLED.
 
 Harmonogram Prac:
 
 1 tydzień - kompletowanie sprzętu (wyświetlacz, płytka, mikrofon).
 
-2 tydzień - zapoznanie ze środowiskiem.
+2 tydzień - zapoznanie ze środowiskiem. Kompletowanie dokumentacji technicznej poszczególnych modułów.
 
 3,4,5,6 tydzień - wstępne zestawianie elementów oraz zczytywanie dźwięku i analiza widmowa.
 
