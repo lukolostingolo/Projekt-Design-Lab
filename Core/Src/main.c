@@ -18,10 +18,10 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#define ARM_MATH_CM7
+#include "arm_math.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -50,14 +50,15 @@ DMA_HandleTypeDef hdma_dfsdm1_flt1;
 
 /* USER CODE BEGIN PV */
 //DLA MONO F_DFSDM = 60MHZ, DIV = , CKOUTDIV =
-#define AUDIO_REC	1024
-int32_t RecBuf_first[AUDIO_REC/2];
-int32_t RecBuf_second[AUDIO_REC/2];
+#define AUDIO_REC	512
+int32_t RecBuf[AUDIO_REC];
 int32_t PlayBuf[AUDIO_REC];//polaczone kanaly
-int32_t PlayBuf_first[AUDIO_REC/2];//pierwszy kanal
-int32_t PlayBuf_second[AUDIO_REC/2];//2 kanal
+float32_t fftBuf[AUDIO_REC];
+float32_t fftOut[AUDIO_REC];
+float32_t fftOutMag[AUDIO_REC];
 uint8_t DmaRecHalfBuffCplt = 0;
 uint8_t DmaRecBuffCplt = 0;
+arm_rfft_fast_instance_f32 fft_audio;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -105,36 +106,31 @@ int main(void)
   MX_DMA_Init();
   MX_DFSDM1_Init();
   /* USER CODE BEGIN 2 */
-  HAL_DFSDM_FilterRegularStart_DMA(&hdfsdm1_filter0, RecBuf_first, AUDIO_REC);
-  HAL_DFSDM_FilterRegularStart_DMA(&hdfsdm1_filter1, RecBuf_second, AUDIO_REC);
+  //HAL_DFSDM_FilterRegularStart_DMA(&hdfsdm1_filter0, RecBuf, AUDIO_REC);
+  HAL_DFSDM_FilterRegularStart_DMA(&hdfsdm1_filter1, RecBuf, AUDIO_REC);
+  arm_rfft_fast_init_f32(&fft_audio, AUDIO_REC/2);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  int count = 0;
 	  if(DmaRecBuffCplt == 1){
-		  for(int i = 0; i < AUDIO_REC; i+=2){
-			  PlayBuf[i] = RecBuf_first[count] >> 8;
-			  PlayBuf[i+1] = RecBuf_second[count] >> 8;
-			  PlayBuf_first[count] = RecBuf_first[count] >> 8;
-			  PlayBuf_second[count] = RecBuf_second[count] >> 8;
-			  count++;
+		  for(int i = 0; i < AUDIO_REC/2; i++){
+			  PlayBuf[i] = RecBuf[i] >> 8;
+			  fftBuf[i] = (float)PlayBuf[i];
 		  }
 		  DmaRecBuffCplt = 0;
 	  }
-	  count = AUDIO_REC/2;
 	  if(DmaRecBuffCplt == 1){
-		  for(int i = AUDIO_REC/2; i < AUDIO_REC; i+=2){
-			  	  PlayBuf[i] = RecBuf_first[count] >> 8;
-			  	  PlayBuf[i+1] = RecBuf_second[count] >> 8;
-			  	  PlayBuf_first[count] = RecBuf_first[count] >> 8;
-			  	  PlayBuf_second[count] = RecBuf_second[count] >> 8;
-			  	  count++;
+		  for(int i = AUDIO_REC/2; i < AUDIO_REC; i++){
+			  	  PlayBuf[i] = RecBuf[i] >> 8;
+			  	  fftBuf[i] = (float)PlayBuf[i];
 		  	  }
 		  	  DmaRecHalfBuffCplt = 0;
 	  }
+	  arm_rfft_fast_f32(&fft_audio, fftBuf, fftOut, 0);
+	  //arm_cmplx_mag_f32(fftOut, fftOutMag, AUDIO_REC/2);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
